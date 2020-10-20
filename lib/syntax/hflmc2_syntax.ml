@@ -11,6 +11,7 @@ module Raw_hflz = Raw_hflz
 module IdMap    = IdMap
 module IdSet    = IdSet
 module Trans    = Trans
+module Solver   = Solver
 
 exception LexingError of string
 exception ParseError of string

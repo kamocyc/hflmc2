@@ -32,7 +32,7 @@ rule token = parse
 | "false"                  { FALSE     }
 | ("\\"|"λ")               { LAMBDA    }
 | ("=v"|"=ν")              { DEF_G     }
-| "=μ"                     { DEF_L     }
+| ("=m"|"=μ")              { DEF_L     }
 | "."                      { DOT       }
 | ":"                      { COLON     }
 | ";"                      { SEMICOLON }

@@ -21,10 +21,12 @@ let to_string id =
 
 let gen : ?name:string -> 'annot -> 'anno t =
   fun ?(name="x") ann ->
-     { name = name
-     ; id = gen_id()
-     ; ty = ann
-     }
+    let id = gen_id() in
+    print_string @@ "gen name: " ^ name ^ ", id: " ^ string_of_int id ^ "\n";
+    { name = name
+    ; id = id
+    ; ty = ann
+    }
 
 let remove_ty : 'ty t -> unit t = fun x -> { x with ty = () }
 
