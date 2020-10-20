@@ -183,9 +183,9 @@ module Fn = struct
   let const x _ = x
 
   let print ?(tag="") pp x =
-    if tag = ""
-    then Format.printf "@[%a@]@." pp x
-    else Format.printf "%s: @[%a@]@." tag pp x
+    match tag with
+    | "" -> Format.printf "@[%a@]@." pp x
+    | _ -> Format.printf "%s: @[%a@]@." tag pp x
 
   let on injection g x y = g (injection x) (injection y)
 
