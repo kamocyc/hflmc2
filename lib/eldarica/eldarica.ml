@@ -15,4 +15,7 @@ let parse_file in_name =
   in_name |> open_in |> Lexing.from_channel |> parse
 
 let parse_string data =
+  print_string "parse_string:\n";
+  print_string data;
+  print_string "";
   data |> Lexing.from_string |> parse

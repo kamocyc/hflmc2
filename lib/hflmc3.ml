@@ -46,6 +46,17 @@ let report_times () =
         in Print.pr "%s %f sec@." s v
       end
 
+let save_hes_to_file hes =
+  Random.self_init ();
+  let r = Random.int 0x10000000 in
+  let file = Printf.sprintf "/tmp/%s-%d.smt2" "nuonly" r in
+  let oc = open_out file in
+  let fmt = Format.formatter_of_out_channel oc in
+  Printf.fprintf oc "%%HES\n" ;
+  Solver.A.hflz_hes' Print.simple_ty_ fmt hes;
+  Format.pp_print_flush fmt ();
+  file
+  
 let main file =
   let psi, _ = Syntax.parse_file file in
   Log.app begin fun m -> m ~header:"Input" "%a"
@@ -55,10 +66,15 @@ let main file =
   Log.app begin fun m -> m ~header:"Simplified" "%a"
     Print.(hflz_hes simple_ty_) psi
   end;
-  let psi = Syntax.Solver.elim_mu_with_rec psi 0 0 in
+  let psi = Solver.elim_mu_with_rec psi 0 0 in
   Log.app begin fun m -> m ~header:"Mu approx" "%a"
     Print.(hflz_hes simple_ty_) psi
   end;
+  Log.app begin fun m -> m ~header:"Mu approx2" "%a"
+    (Solver.A.hflz_hes' Print.simple_ty_) psi
+  end;
+  print_int @@ List.length psi;
+  print_string @@ "File name: " ^ save_hes_to_file psi ^ "\n";
   let psi, top = Syntax.Trans.Preprocess.main psi in
   match top with
   | Some(top) -> begin

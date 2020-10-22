@@ -269,10 +269,22 @@ let rec unsat_proof_of_eldarica_cex nodes =
                 Rid.from_string Dag.(x.head);
               args=Dag.(x.args);
               nodes=[];}::(unsat_proof_of_eldarica_cex xs) (* TODO *)
+
+let show_process_status = function
+    | Unix.WEXITED code -> "WEXITED" ^ (string_of_int code)
+    | Unix.WSIGNALED code -> "WSIGNALED" ^ (string_of_int code)
+    | Unix.WSTOPPED code -> "WSTOPPED" ^ (string_of_int code)
+
+let pp_process_result fmt stat out err =
+  Format.pp_print_string fmt @@ "out: " ^ out ^ "\n";
+  Format.pp_print_string fmt @@ "status: " ^ (show_process_status stat) ^ "\n";
+  Format.pp_print_string fmt @@ "err: " ^ err ^ "\n"
+  
 let get_unsat_proof ?(timeout=100.0) chcs solver = 
   let open Hflmc2_util in
   let file = save_chc_to_smt2 chcs solver in
   let cmd = selected_cex_cmd solver in
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  let stat, out, err = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  pp_process_result Format.std_formatter stat out err;
   let p = Eldarica.parse_string out in
   unsat_proof_of_eldarica_cex p

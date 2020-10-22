@@ -296,9 +296,8 @@ let rec hflz_ : (Prec.t -> 'ty Fmt.t) -> Prec.t -> 'ty Hflz.t Fmt.t =
           (argty (format_ty_ Prec.(succ arrow))) x.ty
           (hflz_ format_ty_ Prec.abs) psi
     | Forall (x, psi) ->
-        show_paren (prec > Prec.abs) ppf "@[<1>∀%a:%a.@,%a@]"
+        show_paren (prec > Prec.abs) ppf "@[<1>∀%a.@,%a@]"
           id x
-          (argty (format_ty_ Prec.(succ arrow))) x.ty
           (hflz_ format_ty_ Prec.abs) psi
     | App (psi1, psi2) ->
         show_paren (prec > Prec.app) ppf "@[<1>%a@ %a@]"
@@ -324,4 +323,3 @@ let hflz_hes : (Prec.t -> 'ty Fmt.t) -> 'ty Hflz.hes Fmt.t =
   fun format_ty_ ppf hes ->
     Fmt.pf ppf "@[<v>%a@]"
       (Fmt.list (hflz_hes_rule format_ty_)) hes
-
