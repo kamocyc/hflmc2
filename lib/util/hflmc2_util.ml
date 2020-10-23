@@ -1,3 +1,5 @@
+type process_status = Unix.process_status
+
 module Core = Core
 open Core
 
@@ -201,7 +203,18 @@ module Fn = struct
   let assert_no_exn f =
     try f () with e -> print_endline (Exn.to_string e); assert false
 
+  let pp_process_result fmt stat out err =
+    let show_process_status : process_status -> string = function
+      | WEXITED code -> "WEXITED" ^ (string_of_int code)
+      | WSIGNALED code -> "WSIGNALED" ^ (string_of_int code)
+      | WSTOPPED code -> "WSTOPPED" ^ (string_of_int code) in
+    Format.pp_print_string fmt @@ "Process result:\n";
+    Format.pp_print_string fmt @@ "out: " ^ out ^ "\n";
+    Format.pp_print_string fmt @@ "status: " ^ (show_process_status stat) ^ "\n";
+    Format.pp_print_string fmt @@ "err: " ^ err ^ "\n"
+    
   let run_command ?(timeout=20.0) cmd =
+    Format.pp_print_string Format.std_formatter @@ "Run command \"" ^ (String.concat ~sep:" " @@ Array.to_list cmd) ^ "\"\n";
     let f_out, fd_out = Unix.mkstemp "/tmp/run_command.stdout" in
     let f_err, fd_err = Unix.mkstemp "/tmp/run_command.stderr" in
     let process_status = Lwt_main.run @@
@@ -215,6 +228,7 @@ module Fn = struct
     let stderr = read_file f_err in
     Unix.remove f_out;
     Unix.remove f_err;
+    pp_process_result Format.std_formatter process_status stdout stderr;
     (process_status, stdout, stderr)
 
   class counter = object

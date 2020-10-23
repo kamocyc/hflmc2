@@ -7,6 +7,8 @@ open Hflmc2_util
 
 let oneshot = ref false
 
+let no_approx_mu = ref false
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -88,6 +90,8 @@ type params =
 
   ; mode_burn_et_al: bool [@default false] [@docs "Typing"] [@docv "Use the subtyping rule of burn et al"]
   (** Use Subtying rule in burn et al *)
+  
+  ; no_approx_mu : bool [@default false]
   }
   [@@deriving cmdliner,show]
 
@@ -103,6 +107,7 @@ let set_up_params params =
   set_ref Typing.solver                    params.solver;
   set_ref Typing.show_refinement           params.show_refinement;
   set_ref Typing.mode_burn_et_al           params.mode_burn_et_al;
+  set_ref no_approx_mu                     params.no_approx_mu;
   params.input
 
 (******************************************************************************)

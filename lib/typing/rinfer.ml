@@ -296,10 +296,14 @@ let rec infer hes env top =
     ) constraints in
 
     let simplified = simplify constraints in
+    print_string "Simplified CHCs:\n";
+    List.iter (fun c -> print_chc c; print_string "\n") simplified;
     let size = dnf_size simplified in
     Printf.printf "[Size] %d\n" size;
 
+    (* TODO: ? *)
     if size > 1 then begin
+    (* if true then begin *)
       let dual = List.map Chc.dual constraints in
       let simplified' = simplify dual in
       let size_dual = dnf_size simplified' in

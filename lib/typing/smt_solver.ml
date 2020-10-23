@@ -25,6 +25,7 @@ let save_fpl_to_smt2 solver fpl =
     Random.self_init ();
     let r = Random.int 0x10000000 in
     let file = Printf.sprintf "/tmp/%s-%d.smt2" (name_of_solver solver) r in
+    print_string @@ "save_fpl_to_smt2: " ^ file ^ "\n";
     let oc = open_out file in
     Printf.fprintf oc "%s" smt2;
     close_out oc;
@@ -34,7 +35,7 @@ let check_sat_fpl ?(timeout=100000.0) solver fpl =
   let open Hflmc2_util in
   let file = save_fpl_to_smt2 solver fpl in
   let cmd = selected_cmd solver in
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  let status_code, out, stderr = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
   match String.lsplit2 out ~on:'\n' with
   | Some ("unsat", _) -> `Unsat
   | Some ("sat", _) -> `Sat

@@ -66,13 +66,17 @@ let main file =
   Log.app begin fun m -> m ~header:"Simplified" "%a"
     Print.(hflz_hes simple_ty_) psi
   end;
-  let psi = Solver.elim_mu_with_rec psi 0 0 in
-  Log.app begin fun m -> m ~header:"Mu approx" "%a"
-    Print.(hflz_hes simple_ty_) psi
-  end;
-  Log.app begin fun m -> m ~header:"Mu approx2" "%a"
-    (Solver.A.hflz_hes' Print.simple_ty_) psi
-  end;
+  let psi = if not @@ !Hflmc2_options.no_approx_mu then
+    let psi = Solver.elim_mu_with_rec psi 0 0 in
+    Log.app begin fun m -> m ~header:"Mu approx" "%a"
+      Print.(hflz_hes simple_ty_) psi
+    end;
+    Log.app begin fun m -> m ~header:"Mu approx2" "%a"
+      (Solver.A.hflz_hes' Print.simple_ty_) psi
+    end;
+    psi
+  else
+    psi in
   print_int @@ List.length psi;
   print_string @@ "File name: " ^ save_hes_to_file psi ^ "\n";
   let psi, top = Syntax.Trans.Preprocess.main psi in
