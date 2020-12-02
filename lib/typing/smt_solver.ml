@@ -34,10 +34,10 @@ let check_sat_fpl ?(timeout=100000.0) solver fpl =
   let open Hflmc2_util in
   let file = save_fpl_to_smt2 solver fpl in
   let cmd = selected_cmd solver in
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
-  match String.lsplit2 out ~on:'\n' with
-  | Some ("unsat", _) -> `Unsat
-  | Some ("sat", _) -> `Sat
-  | Some ("unknown", _) -> `Unknown
+  let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  match lsplit2_fst out ~on:'\n' with
+  | "unsat", _ -> `Unsat
+  | "sat", _ -> `Sat
+  | "unknown", _ -> `Unknown
   | _ -> 
     failwith @@ Printf.sprintf "failed to handle smt solver result: %s" out

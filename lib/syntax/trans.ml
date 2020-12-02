@@ -132,7 +132,7 @@ module Subst = struct
         | Var x ->
             begin match IdMap.lookup env x with
             | t -> t
-            | exception Not_found -> Var x
+            | exception Core.Not_found_s _ -> Var x
             end
         | Or(phi1,phi2)  -> Or(hflz env phi1, hflz env phi2)
         | And(phi1,phi2) -> And(hflz env phi1, hflz env phi2)
@@ -174,7 +174,7 @@ module Subst = struct
         | Var x ->
             begin match IdMap.lookup env x with
             | t -> t
-            | exception Not_found -> Var x
+            | exception Core.Not_found_s _ -> Var x
             end
         | Bool _         -> phi
         | Or(phis,k)     -> Or(List.map ~f:(hfl env) phis, k)
@@ -372,8 +372,9 @@ module Simplify = struct
           let phi2 = go phi2 in
           let phis = List.filter ~f:Fn.(not <<< is_trivially_false) [phi1;phi2] in
           Hflz.mk_ors phis
-      | Abs(x,phi)     -> Abs(x, go phi)
-      | App(phi1,phi2) -> App(go phi1, go phi2)
+      | Abs(x, phi)     -> Abs(x, go phi)
+      | App(phi1, phi2) -> App(go phi1, go phi2)
+      | Forall(x, phi)  -> Forall(x, go phi)
       | phi -> phi
     in go
   let hflz_hes_rule : 'a Hflz.hes_rule -> 'a Hflz.hes_rule =

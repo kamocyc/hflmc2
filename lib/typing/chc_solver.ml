@@ -37,8 +37,8 @@ let selected_solver size =
 let call_template cmd timeout = 
     let open Hflmc2_util in
     fun file -> 
-    let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
-    String.lsplit2 out ~on:'\n'
+    let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+    lsplit2_fst out ~on:'\n'
 
 let call_fptprove timeout file = 
   let open Hflmc2_util in
@@ -47,11 +47,12 @@ let call_fptprove timeout file =
     | Not_found -> Filename.concat (Sys.getenv "HOME") "bitbucket.org/uhiro/fptprove"
   in
   Sys.chdir fptprove_path;
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [[|"./script/hflmc3.sh"|]; [|file|]]) in
+  (* TODO: fix path *)
+  let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [[|"/opt/home2/git/fptprove/hflmc3.sh"|]; [|file|]]) in
   let l = String.split out ~on:',' in
   match List.nth l 1 with
-    | Some(x) -> Some(x, "")
-    | None -> None
+    | Some(x) -> x, Some ""
+    | None -> "Failed", None
 
 let selected_cmd timeout = function
   | `Spacer -> call_template [|"z3"; "fp.engine=spacer"|] timeout
@@ -249,14 +250,14 @@ let check_sat ?(timeout=100000.0) chcs solver =
     let open Hflmc2_util in
     let f = selected_cmd timeout solver in
     match f file with
-    | Some ("unsat", _) -> `Unsat
-    | Some ("sat", model) ->
+    | "unsat", _ -> `Unsat
+    | "sat", Some model ->
       let open Hflmc2_options in
       if !Typing.show_refinement then
         `Sat(parse_model model)
       else
         `Sat(Error "did not calculate refinement. Use --show-refinement")
-    | Some ("unknown", _) -> `Unknown
+    | "unknown", Some _ -> `Unknown
     | _ -> (Printf.printf "Failed to handle the result of chc solver\n\n" ; `Fail)
   in 
   match solver with
@@ -289,6 +290,6 @@ let get_unsat_proof ?(timeout=100.0) chcs solver =
   let open Hflmc2_util in
   let file = save_chc_to_smt2 chcs solver in
   let cmd = selected_cex_cmd solver in
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
   let p = Eldarica.parse_string out in
   unsat_proof_of_eldarica_cex p
