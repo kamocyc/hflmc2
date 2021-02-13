@@ -225,7 +225,11 @@ let parse_model model =
         (id, args, body)
     | s -> fail "parse_def" s
   in
-  print_string model;
+  print_endline "Before model simplification:";
+  print_endline model;
+  let model = Simplify_model.simplify_model model in
+  print_endline "After model simplification:";
+  print_endline model;
   match Sexplib.Sexp.parse model with
   | Done(model, _) -> begin 
     match model with
