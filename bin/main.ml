@@ -11,6 +11,7 @@ let () =
         tmp_file
     | None -> exit 1
   in
+  print_endline @@ "INPUT FILE: " ^ file;
     begin match Hflmc3.main file with
     | r ->
         Fmt.pr "@[<v 2>Verification Result:@,%s@]@." @@ Hflmc3.show_result r;
