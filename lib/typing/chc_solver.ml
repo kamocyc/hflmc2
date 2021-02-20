@@ -200,6 +200,7 @@ let parse_model model =
           | "and" -> `And 
           | "or"  -> `Or 
           | "not" -> `Not 
+          | "exists" -> `Exists
           | s     -> fail "parse_formula:list" (Atom s)
         in
         begin match a with
@@ -214,6 +215,14 @@ let parse_model model =
         | `Not -> 
             let [@warning "-8"] [f] = List.map ss ~f:parse_formula in
             negate_ref f
+        | `Exists ->
+          let [@warning "-8"] (List args)::[f] = ss in
+          let as'' = List.map ~f:parse_arg args in
+          let f = parse_formula f in
+          let rec go a = match a with
+            | [] -> f
+            | x::xs -> RExists (x, go xs) in
+          go as''
         end
     | s -> fail "parse_formula" s
   in

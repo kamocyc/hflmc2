@@ -26,7 +26,8 @@ let simplify_body acc args body =
   in
   let args = pargs args |> List.map ~f:to_string |> String.concat ~sep:"\n"in
   let to_simplify = List [Atom "assert"; body] in
-  let body = acc ^ "\n" ^ args ^ "\n" ^ (to_string to_simplify) ^ "\n(apply ctx-solver-simplify)" in
+  (* Repeat application of ctx-solver-simplify may result in further simplificaion. *)
+  let body = acc ^ "\n" ^ args ^ "\n" ^ (to_string to_simplify) ^ "\n(apply (then ctx-solver-simplify qe ctx-solver-simplify ctx-solver-simplify ctx-solver-simplify))" in
   let s = (save_file body) in
   (* print_endline @@ "file: " ^ s; *)
   let output_path = get_random_file_name () in
@@ -75,7 +76,7 @@ let simplify_model model =
             acc ^ "\n  " ^ (simplify_function_definition acc d |> to_string)
           )
           ~init:"  " in
-      "(model\n" ^ (Stdlib.String.trim r) ^ "\n)"
+      "(model\n  " ^ (Stdlib.String.trim r) ^ "\n)"
     end
     | _ -> invalid_arg "model syntax error: parse_model" 
     end

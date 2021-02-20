@@ -45,6 +45,7 @@ and refinement
    | RPred of Formula.pred * Arith.t list
    | RAnd of refinement * refinement
    | ROr of refinement * refinement
+  | RExists of [`Int] Id.t * refinement
    | RTemplate of template
 and template = id * Arith.t list (* template prdicate name and its args *)
 
@@ -90,6 +91,14 @@ let rec print_refinement = function
     Printf.printf " \\/ "; 
     print_refinement y;
     print_string ")";
+  | RExists (x, f) -> 
+    print_string "(";
+    print_string "∃";
+    Print.id Fmt.stdout x;
+    Fmt.flush Fmt.stdout ();
+    print_string ".";
+    print_refinement f;
+    print_string ")"
   | RTemplate t -> print_template t
 
 let rec print_rtype = function
