@@ -266,11 +266,15 @@ let check_sat ?(timeout=100000.0) chcs solver =
     match f file with
     | "unsat", _ -> `Unsat
     | "sat", Some model ->
-      let open Hflmc2_options in
-      if !Typing.show_refinement then
-        `Sat(parse_model model)
-      else
-        `Sat(Error "did not calculate refinement. Use --show-refinement")
+      if Stdlib.String.trim model = "" then
+        `Sat(Error "model was not produced")
+      else begin
+        let open Hflmc2_options in
+        if !Typing.show_refinement then
+          `Sat(parse_model model)
+        else
+          `Sat(Error "did not calculate refinement. Use --show-refinement")
+      end
     | "unknown", Some _ -> `Unknown
     | _ -> (Printf.printf "Failed to handle the result of chc solver\n\n" ; `Fail)
   in 
