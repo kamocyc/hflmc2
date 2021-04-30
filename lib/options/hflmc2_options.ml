@@ -87,6 +87,8 @@ type params =
   ; show_refinement: bool [@default false] [@docs "Typing"] [@docv "show refinement"]
   (** Show refinement types. This sometimes fails because of parsing the solution from CHC solver... *)
 
+  ; dont_show_refinement : bool [@default false] [@docs "Typing"] [@docv "don't show refinement"]
+  
   ; mode_burn_et_al: bool [@default false] [@docs "Typing"] [@docv "Use the subtyping rule of burn et al"]
   (** Use Subtying rule in burn et al *)
 
@@ -105,7 +107,7 @@ let set_up_params params =
   set_ref Abstraction.modify_pred_by_guard (not params.abst_no_modify_pred_by_guard);
   set_ref Refine.use_legacy                params.refine_legacy;
   set_ref Typing.solver                    params.solver;
-  set_ref Typing.show_refinement           params.show_refinement;
+  set_ref Typing.show_refinement           (params.show_refinement && not params.dont_show_refinement);
   set_ref Typing.mode_burn_et_al           params.mode_burn_et_al;
   set_ref Typing.no_disprove               params.no_disprove;
   params.input
