@@ -7,6 +7,8 @@ open Hflmc2_util
 
 let oneshot = ref false
 
+let tractable_check_only = ref false
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -94,6 +96,8 @@ type params =
 
   ; no_disprove: bool [@default false]
     (** Disable disproving*)
+    
+  ; tractable_check_only: bool [@default false]
   }
   [@@deriving cmdliner,show]
 
@@ -110,6 +114,7 @@ let set_up_params params =
   set_ref Typing.show_refinement           (params.show_refinement && not params.dont_show_refinement);
   set_ref Typing.mode_burn_et_al           params.mode_burn_et_al;
   set_ref Typing.no_disprove               params.no_disprove;
+  set_ref tractable_check_only             params.tractable_check_only;
   params.input
 
 (******************************************************************************)

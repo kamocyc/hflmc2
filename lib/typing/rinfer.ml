@@ -237,6 +237,9 @@ let print_derived_refinement_type hes constraints =
   in
   inner hes
 
+exception ExnTractable
+exception ExnIntractable
+
 (* Algorithm
 Input: hes(simply typed) env top
 Output: Valid/Invalid/Fail/Unknown
@@ -317,13 +320,22 @@ let rec infer hes env top =
       | `Fail -> failwith "hoge"
       | _ ->
         begin*)
-          if size > 1 && size_dual > 1 then print_string "[Warning]Some definite clause has or-head\n";
+          if size > 1 && size_dual > 1 then begin
+            if !Hflmc2_options.tractable_check_only then
+              raise ExnIntractable
+            else
+              print_string "[Warning]Some definite clause has or-head\n"
+          end;
+          if !Hflmc2_options.tractable_check_only then raise ExnTractable;
           if size' > 1 then
             call_solver_with_timer target Chc_solver.(`Fptprove)
           else
             try_intersection_type target size'
         (*end*)
-    end else try_intersection_type simplified size
+    end else begin
+      if !Hflmc2_options.tractable_check_only then raise ExnTractable;
+      try_intersection_type simplified size
+    end
   in 
   let x = infer_main hes env top in
   report_times ();

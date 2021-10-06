@@ -12,6 +12,7 @@ let () =
     | None -> exit 1
   in
   print_endline @@ "INPUT FILE: " ^ file;
+  try
     begin match Hflmc3.main file with
     | r ->
         Fmt.pr "@[<v 2>Verification Result:@,%s@]@." @@ Hflmc3.show_result r;
@@ -23,3 +24,8 @@ let () =
         | Hflmc3.Syntax.LexingError e
         ) -> print_endline e; exit 1
     end;
+  with
+    | Hflmc3.Typing.Infer.ExnTractable ->
+      print_endline "tractable"
+    | Hflmc3.Typing.Infer.ExnIntractable ->
+      print_endline "intractable"
