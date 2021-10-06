@@ -323,8 +323,11 @@ let rec infer hes env top =
           if size > 1 && size_dual > 1 then begin
             if !Hflmc2_options.tractable_check_only then
               raise ExnIntractable
-            else
-              print_string "[Warning]Some definite clause has or-head\n"
+            else begin
+              print_string "[Warning]Some definite clause has or-head\n";
+              (if !Hflmc2_options.stop_if_intractable then
+                raise ExnIntractable)
+            end
           end;
           if !Hflmc2_options.tractable_check_only then raise ExnTractable;
           if size' > 1 then

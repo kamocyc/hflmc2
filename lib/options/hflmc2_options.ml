@@ -9,6 +9,8 @@ let oneshot = ref false
 
 let tractable_check_only = ref false
 
+let stop_if_intractable = ref false
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -98,6 +100,8 @@ type params =
     (** Disable disproving*)
     
   ; tractable_check_only: bool [@default false]
+  
+  ; stop_if_intractable : bool [@default false]
   }
   [@@deriving cmdliner,show]
 
@@ -115,6 +119,7 @@ let set_up_params params =
   set_ref Typing.mode_burn_et_al           params.mode_burn_et_al;
   set_ref Typing.no_disprove               params.no_disprove;
   set_ref tractable_check_only             params.tractable_check_only;
+  set_ref stop_if_intractable              params.stop_if_intractable;
   params.input
 
 (******************************************************************************)
