@@ -1,0 +1,403 @@
+; (declare-const v_0 Int)
+; (declare-const v_1 Int)
+; (declare-const v_2 Int)
+; (declare-const v_3 Int)
+; (declare-const v_4 Int)
+; (declare-const v_5 Int)
+; (declare-const v_6 Int)
+
+; converted
+(define-fun Y2
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y84
+  ( (v_0 Int) (v_1 Int) ) Bool
+  (and (>= v_1 1) (>= (+ v_1 (* (- 1) v_0)) 1))
+)
+(define-fun Y3
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  true
+)
+(define-fun Y1
+  ( (v_m Int) (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y137
+  ( (v_m Int) (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (>= v_0 1)
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y136
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  false
+)
+(define-fun Y135
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  false
+)
+(define-fun Y134
+  ( (v_m Int) (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (>= v_0 1)
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y133
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (>= (* (- 1) v_0) 0)
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y10
+  ( (v_m Int) (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and
+    (>= v_0 1)
+    (or
+      (and
+        (>= v_0 0)
+        (= v_1 0)
+        (= v_2 0)
+        (>= (+ v_5 (* (- 1) v_3)) 1)
+        (>= (+ v_5 (* v_0 (- 1))) 1)
+        (>= (+ v_5 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_0) (* v_2 (- 1))) 2))
+      (and
+        (>= v_0 0)
+        (>= (+ v_5 (* (- 1) v_0)) 1)
+        (>= v_4 3)
+        (>= (+ v_4 v_0 (* (- 1) v_1)) 2)
+        (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)
+      )
+    )
+    (>= v_5 1)
+  )
+)
+(define-fun Y131
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) ) Bool
+  (and
+    (>= (+ v_0 (* (- 1) v_1)) 1)
+    (>= v_2 1)
+    (>= (+ v_0 (* v_2 (- 1))) 0)
+    (>= (+ v_1 v_0) 1)
+    (>= (+ v_3 (* (- 1) v_2)) 1)
+  )
+)
+(define-fun Y130
+  ( (v_0 Int) (v_1 Int) ) Bool
+  (and
+    (>= (+ v_0 (* (- 1) v_1)) 1)
+    (>= (+ v_1 v_0) 1)
+  )
+)
+(define-fun Y118
+  ( (v_0 Int) (v_1 Int) ) Bool
+  true
+)
+(define-fun Y117
+  ( (v_0 Int) ) Bool
+  true
+)
+(define-fun Y116
+  ( ) Bool
+  true
+)
+(define-fun Y93
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) ) Bool
+  (and
+    (>= v_2 1)
+    (and (>= v_3 1) (>= (+ v_3 (* (- 1) v_2)) 1))
+  )
+)
+(define-fun Y92
+  ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+  (and
+    (>= v_1 1)
+    (and (>= v_2 1) (>= (+ v_2 (* (- 1) v_1)) 1))
+  )
+)
+(define-fun Y85
+    ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+    (or
+      (and
+        (>= (* (- 1) v_1) 0)
+        (>= v_2 1)
+        (>= (+ v_2 (* (- 1) v_1)) 1)
+      )
+      (exists ( (v_4 Int) (v_3 Int) )
+        (and 
+          (>= (+ v_4 v_3) 1)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_1 (- 1)) 0)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_4 (* (- 1) (+ v_1 (- 1)))) 1)
+          (>= (+ v_2 (* (- 1) (+ v_1 (- 1)))) 2)
+          (>= v_4 1)
+        )
+      )
+    )
+  )
+(define-fun Y83
+  ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+  (and
+    (and (>= v_2 1) (>= (+ v_2 (* (- 1) v_1)) 1))
+    (or
+      (and
+        (>= (* (- 1) v_1) 0)
+        (>= v_2 1)
+        (>= (+ v_2 (* (- 1) v_1)) 1)
+      )
+      (exists ( (v_4 Int) (v_3 Int) )
+        (and 
+          (>= (+ v_4 v_3) 1)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_1 (- 1)) 0)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_4 (* (- 1) (+ v_1 (- 1)))) 1)
+          (>= (+ v_2 (* (- 1) (+ v_1 (- 1)))) 2)
+          (>= v_4 1)
+        )
+      )
+    )
+  )
+)
+(define-fun Y132
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (and
+    (and (>= (+ v_5 (- 1)) 1) (>= (+ (+ v_5 (- 1)) (* (- 1) v_3)) 1))
+    (or
+      (and
+        (>= (* (- 1) v_3) 0)
+        (>= (+ v_5 (- 1)) 1)
+        (>= (+ (+ v_5 (- 1)) (* (- 1) v_3)) 1)
+      )
+      (exists ( (v_4 Int) (v_3 Int) )
+        (and 
+          (>= (+ v_4 v_3) 1)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_3 (- 1)) 0)
+          (>= (+ v_4 (* (- 1) v_3)) 1)
+          (>= (+ v_4 (* (- 1) (+ v_3 (- 1)))) 1)
+          (>= (+ (+ v_5 (- 1)) (* (- 1) (+ v_3 (- 1)))) 2)
+          (>= v_4 1)
+        )
+      )
+    )
+    (and
+      (>= (* (- 1) v_1) 0)
+      (or
+        (and
+          (>= v_1 0)
+          (= v_2 0)
+          (= v_3 0)
+          (>= (+ v_6 (* (- 1) v_4)) 1)
+          (>= (+ v_6 (* v_1 (- 1))) 1)
+          (>= (+ v_6 v_4) 1)
+          (>= (+ v_5 (* (- 1) v_1) (* v_3 (- 1))) 2))
+        (and
+          (>= v_1 0)
+          (>= (+ v_6 (* (- 1) v_1)) 1)
+          (>= v_5 3)
+          (>= (+ v_5 v_1 (* (- 1) v_2)) 2)
+          (>= (+ v_5 (* (- 1) v_1) (* (- 1) v_3)) 2)
+        )
+      )
+      (>= v_6 1)
+    )
+  )
+)
+
+(define-fun X2
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and (or (and (>= v_5 1) (>= v_0 0) (= v_1 0) (= v_2 0) (>= (+ v_5 (* (- 1) v_3)) 1) (>= (+ v_5 (* (- 1) v_0)) 1) (>= (+ v_5 v_3) 1) (>= (+ v_4 v_0 (* (- 1) v_1)) 2) (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2)) (and (>= v_0 0) (>= (+ v_5 (* (- 1) v_0)) 1) (>= v_4 3) (or (>= (* (- 1) v_5) 0) (not (= v_1 0)) (not (= v_2 0)) (>= (+ v_0 (* (- 1) v_5)) 0) (>= (* (- 1) v_0) 1) (>= (+ v_3 (* (- 1) v_5)) 0) (>= (+ (* (- 1) v_5) (* (- 1) v_3)) 0)) (>= (+ v_4 v_0 (* (- 1) v_1)) 2) (>= (+ v_4 (* (- 1) v_0) (* (- 1) v_2)) 2))) (>= v_5 1))
+)
+(define-fun X84
+  ( (v_0 Int) (v_1 Int) ) Bool
+  (and (>= v_1 1) (>= (+ v_1 (* (- 1) v_0)) 1))
+)
+(define-fun X3
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  true
+)
+(define-fun X1
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (and (X2 v_1 v_2 v_3 v_4 v_5 v_6) (X3 0 v_1 v_2 v_3 v_4 v_5 v_6))
+)
+(define-fun X137
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (exists ( (v_7 Int) ) (and (>= (+ v_4 (* (- 1) v_7)) 1) (>= v_1 1) (X2 v_1 v_2 v_3 v_4 v_5 v_6)))
+)
+(define-fun X136
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  false
+)
+(define-fun X135
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  false
+)
+(define-fun X134
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (exists ( (v_7 Int) ) (and (>= (+ v_7 (* (- 1) v_4)) 0) (>= v_1 1) (X2 v_1 v_2 v_3 v_4 v_5 v_6)))
+)
+(define-fun X133
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) ) Bool
+  (and (>= (* (- 1) v_0) 0) (X2 v_0 v_1 v_2 v_3 v_4 v_5))
+)
+(define-fun X10
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (and (>= v_1 1) (X2 v_1 v_2 v_3 v_4 v_5 v_6))
+)
+(define-fun X131
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) ) Bool
+  (and (>= v_0 1) (>= (+ v_0 (* (- 1) v_1)) 1) (>= v_2 1) (>= (+ v_0 (* (- 1) v_2)) 0) (>= (+ v_1 v_0) 1) (X84 v_2 v_3))
+)
+(define-fun X130
+  ( (v_0 Int) (v_1 Int) ) Bool
+  (and (>= v_0 1) (>= (+ v_0 (* (- 1) v_1)) 1) (>= (+ v_1 v_0) 1))
+)
+(define-fun X118
+  ( (v_0 Int) (v_1 Int) ) Bool
+  true
+)
+(define-fun X117
+  ( (v_0 Int) ) Bool
+  true
+)
+(define-fun X116
+  ( ) Bool
+  true
+)
+(define-fun X93
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) ) Bool
+  (and (>= v_2 1) (X84 v_2 v_3))
+)
+(define-fun X92
+  ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+  (and (>= v_1 1) (X84 v_1 v_2))
+)
+(define-fun X85
+  ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+  (or (and (>= (* (- 1) v_1) 0) (X84 v_1 v_2)) (exists ( (v_4 Int) (v_3 Int) ) (and (>= v_1 1) (>= (+ v_4 v_3) 1) (>= v_4 1) (>= (+ v_4 (* (- 1) v_1)) 0) (>= (+ v_4 (* (- 1) v_3)) 1) (X84 v_1 v_2) (X2 (+ v_1 (- 1)) 0 0 v_3 v_2 v_4) (X3 0 (+ v_1 (- 1)) 0 0 v_3 v_2 v_4))))
+)
+(define-fun X83
+  ( (v_0 Int) (v_1 Int) (v_2 Int) ) Bool
+  (and (X84 v_1 v_2) (X85 0 v_1 v_2))
+)
+(define-fun X132
+  ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int) ) Bool
+  (and (X84 v_3 (+ v_5 (- 1))) (X85 0 v_3 (+ v_5 (- 1))) (X133 v_1 v_2 v_3 v_4 v_5 v_6))
+)
+
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y2 v_0 v_1 v_2 v_3 v_4 v_5) (X2 v_0 v_1 v_2 v_3 v_4 v_5))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y84 v_0 v_1) (X84 v_0 v_1))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y3 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X3 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y1 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X1 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y137 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X137 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y136 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X136 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y135 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X135 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y134 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X134 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y133 v_0 v_1 v_2 v_3 v_4 v_5) (X133 v_0 v_1 v_2 v_3 v_4 v_5))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y10 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X10 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int)) (= (Y131 v_0 v_1 v_2 v_3) (X131 v_0 v_1 v_2 v_3))))
+(assert (forall ( (v_0 Int) (v_1 Int)) (= (Y130 v_0 v_1) (X130 v_0 v_1))))
+(assert (forall ( (v_0 Int) (v_1 Int)) (= (Y118 v_0 v_1) (X118 v_0 v_1))))
+(assert (forall ( (v_0 Int)) (= (Y117 v_0) (X117 v_0))))
+(assert (forall ( (v_0 Int)) (= Y116 X116)))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int)) (= (Y93 v_0 v_1 v_2 v_3) (X93 v_0 v_1 v_2 v_3))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int)) (= (Y92 v_0 v_1 v_2) (X92 v_0 v_1 v_2))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int)) (= (Y85 v_0 v_1 v_2) (X85 v_0 v_1 v_2))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int)) (= (Y83 v_0 v_1 v_2) (X83 v_0 v_1 v_2))))
+(assert (forall ( (v_0 Int) (v_1 Int) (v_2 Int) (v_3 Int) (v_4 Int) (v_5 Int) (v_6 Int)) (= (Y132 v_0 v_1 v_2 v_3 v_4 v_5 v_6) (X132 v_0 v_1 v_2 v_3 v_4 v_5 v_6))))
+(check-sat)

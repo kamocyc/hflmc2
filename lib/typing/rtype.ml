@@ -45,6 +45,7 @@ and refinement
    | RPred of Formula.pred * Arith.t list
    | RAnd of refinement * refinement
    | ROr of refinement * refinement
+   | RExists of [`Int] Id.t * refinement
    | RTemplate of template
 and template = id * Arith.t list (* template prdicate name and its args *)
 
@@ -165,6 +166,7 @@ let rec negate_ref = function
   | ROr(x, y) -> RAnd(negate_ref x, negate_ref y)
   | RTrue -> RFalse
   | RFalse -> RTrue
+  | RExists _ -> failwith "negate_ref"
   | RPred(p, l) -> RPred(Formula.negate_pred p, l)
 
 let rec dual = function
@@ -173,6 +175,7 @@ let rec dual = function
   | ROr(x, y) -> RAnd(dual x, dual y)
   | RTrue -> RFalse
   | RFalse -> RTrue
+  | RExists _ -> failwith "negate_ref"
   | RPred(p, l) -> RPred(Formula.negate_pred p, l)
 
 (* This is an adhoc optimization of formulas. The reason why this function is required is

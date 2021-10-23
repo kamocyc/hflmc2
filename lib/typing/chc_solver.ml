@@ -199,7 +199,8 @@ let parse_model model =
           | ">"   -> `Pred Formula.Gt
           | "and" -> `And 
           | "or"  -> `Or 
-          | "not" -> `Not 
+          | "not" -> `Not
+          | "exists" -> `Exists 
           | s     -> fail "parse_formula:list" (Atom s)
         in
         begin match a with
@@ -246,6 +247,7 @@ let save_chc_to_smt2 chcs solver =
     file
 
 let check_sat ?(timeout=100000.0) chcs solver = 
+  if !model_file <> "" then `Sat(parse_model (Hflmc2_util.Fn.read_file !model_file)) else (
   let check_sat_inner timeout solver = 
     let file = save_chc_to_smt2 chcs solver in
     let open Hflmc2_util in
@@ -274,7 +276,8 @@ let check_sat ?(timeout=100000.0) chcs solver =
         end
     in loop tries
   | `Spacer | `Hoice | `Fptprove as sv -> check_sat_inner timeout sv
-
+)
+  
 (* usp: unsat proof *)
 let rec unsat_proof_of_eldarica_cex nodes = 
   let open Eldarica in

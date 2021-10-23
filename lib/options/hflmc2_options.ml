@@ -30,6 +30,8 @@ module Typing = struct
   let no_disprove          = ref (Obj.magic())
 end
 
+let model_file = ref (Obj.magic())
+
 (******************************************************************************)
 (* Util(?)                                                                    *)
 (******************************************************************************)
@@ -92,6 +94,9 @@ type params =
 
   ; no_disprove: bool [@default false]
     (** Disable disproving*)
+  
+  ; model_file: string [@default ""]
+  (** model parsing mode **)
   }
   [@@deriving cmdliner,show]
 
@@ -108,6 +113,7 @@ let set_up_params params =
   set_ref Typing.show_refinement           params.show_refinement;
   set_ref Typing.mode_burn_et_al           params.mode_burn_et_al;
   set_ref Typing.no_disprove               params.no_disprove;
+  set_ref model_file                       params.model_file;
   params.input
 
 (******************************************************************************)

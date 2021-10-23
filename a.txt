@@ -1,0 +1,30 @@
+(declare-const v_0 Int)
+(declare-const v_1 Int)
+(declare-const v_2 Int)
+; (declare-const v_3 Int)
+; (declare-const v_4 Int)
+(declare-const v_5 Int)
+(declare-const v_6 Int)
+
+(assert
+  (or
+    (and
+      (>= (* (- 1) v_1) 0)
+      (>= v_2 1)
+      (>= (+ v_2 (* (- 1) v_1)) 1)
+    )
+    (exists ( (v_4 Int) (v_3 Int) )
+      (and 
+        (>= (+ v_4 v_3) 1)
+        (>= (+ v_4 (* (- 1) v_3)) 1)
+        (>= (+ v_1 (- 1)) 0)
+        (>= (+ v_4 (* (- 1) v_3)) 1)
+        (>= (+ v_4 (* (- 1) (+ v_1 (- 1)))) 1)
+        (>= (+ v_2 (* (- 1) (+ v_1 (- 1)))) 2)
+        (>= v_4 1)
+      )
+    )
+  )
+)
+  
+(apply ctx-solver-simplify)
