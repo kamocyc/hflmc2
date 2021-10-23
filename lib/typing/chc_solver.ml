@@ -38,7 +38,7 @@ let selected_solver size =
 let call_template cmd timeout = 
     let open Hflmc2_util in
     fun file -> 
-    let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+    let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
     lsplit2_fst out ~on:'\n'
 
 let call_fptprove timeout file = 
@@ -49,7 +49,7 @@ let call_fptprove timeout file =
   in
   Sys.chdir fptprove_path;
   (* TODO: fix path *)
-  let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [[|fptprove_path ^ "/hflmc3.sh"|]; [|file|]]) in
+  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [[|fptprove_path ^ "/hflmc3.sh"|]; [|file|]]) in
   let l = String.split out ~on:',' in
   match List.nth l 1 with
     | Some(x) -> x, Some ""
@@ -308,6 +308,6 @@ let get_unsat_proof ?(timeout=100.0) chcs solver =
   let open Hflmc2_util in
   let file = save_chc_to_smt2 chcs solver in
   let cmd = selected_cex_cmd solver in
-  let _, out, _ = Fn.Command.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
+  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
   let p = Eldarica.parse_string out in
   unsat_proof_of_eldarica_cex p

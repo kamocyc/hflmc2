@@ -214,7 +214,7 @@ module Fn = struct
     Format.pp_print_string fmt @@ "err: " ^ err ^ "\n";
     Format.print_flush ()
     
-  let run_command_ ?(timeout=20.0) cmd =
+  let run_command ?(timeout=20.0) cmd =
     print_endline @@ "RUNNING COMMAND: \"" ^ String.concat ~sep:" " (Array.to_list cmd) ^ "\"";
     let f_out, fd_out = Unix.mkstemp "/tmp/run_command.stdout" in
     let f_err, fd_err = Unix.mkstemp "/tmp/run_command.stderr" in
@@ -241,91 +241,6 @@ module Fn = struct
       cnt <- x + 1;
       x
   end
-  
-  module Command : sig
-    exception Shell_error of string
-
-    type t_result = (unit, [ `Exit_non_zero of int | `Signal of Signal.t | `Timeout]) result
-    
-    val async_command : float -> string -> string list -> Unix.Process_channels.t
-
-    val sync_command_full : float -> string -> string list -> string list -> (string -> unit) -> (string -> unit) -> t_result * string * string
-    
-    val sync_command  : float -> string -> string list -> string list -> t_result * string * string 
-
-    val output_lines : string list -> Out_channel.t -> unit
-
-    val input_lines : In_channel.t -> (string -> unit) -> string list
-    
-    val run_command : ?timeout:float -> string array -> t_result * string * string
-  end = struct
-    exception Shell_error of string
-
-    type t_result = (unit, [ `Exit_non_zero of int | `Signal of Signal.t | `Timeout]) result
-    
-    let output_lines (output : string list) (chan : Out_channel.t) : unit =
-      List.iter
-        ~f:(fun line -> Out_channel.output_string chan (line ^ "\n"))
-        output;
-      Out_channel.flush chan
-
-    let rec do_channel_lines (f : string -> 'a) (chan : In_channel.t) (read_line_handler : string -> unit) : 'a list =
-      match In_channel.input_line chan with
-      | None -> []
-      | Some line -> begin
-        read_line_handler line;
-        f line :: do_channel_lines f chan read_line_handler
-      end
-
-    let input_lines = do_channel_lines (fun x -> x)
-
-    let unlines : string list -> string = String.concat ~sep:"\n"
-
-    let async_command (timeout : float) (name : string) (arguments : string list) :
-      Unix.Process_channels.t =
-      (* use sigkill ? *)
-      print_endline @@ "Run command: \"" ^ (name ^ " " ^ String.concat ~sep:" " arguments) ^ "\"";
-      Unix.open_process_full
-        (Printf.sprintf "bash -c 'timeout %s %s %s'"
-          (string_of_float timeout)
-          name
-          (String.concat ~sep:" " arguments))
-        ~env:(Unix.environment ())
-
-    let pp_process_result fmt status out err =
-      let show_status status = match status with
-      | Ok _ -> "Ok"
-      | Error (`Exit_non_zero 124) -> "Timeout"
-      | Error (`Exit_non_zero c) -> "Error (`Exit_non_zero " ^ string_of_int c ^ ")"
-      | Error (`Signal _) -> "Error (`Signal )" in
-      Format.pp_print_string fmt @@ "Process result:\n";
-      Format.pp_print_string fmt @@ "out: " ^ out ^ "\n";
-      Format.pp_print_string fmt @@ "status: " ^ (show_status status) ^ "\n";
-      Format.pp_print_string fmt @@ "err:\n" ^ err ^ "\n\n"
-
-    let sync_command_full (timeout : float) (name : string) (arguments : string list)
-        (input : string list) (read_line_handler : string -> unit) (read_err_line_handler : string -> unit) : t_result * string * string =
-      let pcs = async_command timeout name arguments in
-      output_lines input pcs.stdin;
-      let out = unlines @@ input_lines pcs.stdout read_line_handler in
-      let err = unlines @@ input_lines pcs.stderr read_err_line_handler in
-      let status = Unix.close_process_full pcs in
-      pp_process_result Format.std_formatter status out err;
-      match status with
-      | Ok () -> (Ok (), out, err)
-      | Error (`Exit_non_zero 124) -> (Error (`Timeout), out, err)
-      | Error (`Exit_non_zero c) -> (Error (`Exit_non_zero c), out, err)
-      | Error (`Signal x) ->
-        if Signal.equal x Signal.int then raise Sys.Break else (Error (`Signal x), out, err)
-    
-    let sync_command timeout name arguments input = sync_command_full timeout name arguments input print_endline (fun _ -> ())
-    
-    let run_command ?(timeout=10.0) commands =
-      match Array.to_list commands with
-      | [] -> failwith "run_command"
-      | name::arguments -> sync_command timeout name arguments []
-  end
-
 end
 
 
