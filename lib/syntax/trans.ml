@@ -126,46 +126,50 @@ module Subst = struct
             | _ -> assert false
             end
         | Op(op, as') -> Op(op, List.map ~f:(arith env) as')
-
-    let rec rename_binding_if_necessary (env : IdSet.t) (phi : 'ty S.Hflz.t): 'ty S.Hflz.t =
-      let open S in
-      let rec subst_new_id x_arg phi =
-        match IdSet.find env ~f:((Id.eq)x_arg) with
-          | Some _ -> begin
-            let new_x = { x_arg with id = Id.gen_id () } in
-            let new_x_term = (
-              match x_arg.ty with
-              | TyInt -> Hflz.Arith (Var { new_x with ty = `Int })
-              | TySigma ty -> Hflz.Var ({ new_x with ty = ty})
-            ) in
-            (* arithの対応 *)
-            let t' = hflz (IdMap.singleton (Id.remove_ty x_arg) new_x_term) phi in
-            ({ new_x with ty = x_arg.ty } , go t')
+    
+    let rec rename_bindings (phi : 'ty S.Hflz.t): 'ty S.Hflz.t =
+      let rec go rename (phi : 'ty S.Hflz.t): 'ty S.Hflz.t = match phi with
+        | Var x -> begin
+          match IdMap.find rename x with
+          | Some v -> begin
+            let ty =
+              (match v.S.Id.ty with
+              | TySigma ty -> ty
+              | TyInt -> assert false) in
+            Var {v with ty}
           end
-          | None -> (x_arg, go phi)
-      and go (phi : 'ty S.Hflz.t) : 'ty S.Hflz.t = match phi with
-        | Var x -> Var x
+          | None -> Var x
+        end
         | Or (phi1, phi2) ->
-          Or (go phi1, go phi2)
+          Or (go rename phi1, go rename phi2)
         | And (phi1, phi2) ->
-          And (go phi1, go phi2)
+          And (go rename phi1, go rename phi2)
         | App (phi1, phi2) ->
-          App (go phi1, go phi2)
-        | Abs (x, t) ->
-          let (x, t) = subst_new_id x t in
-          Abs (x, t)
-        | Forall (x, t) ->
-          let (x, t) = subst_new_id x t in
-          Forall (x, t)
-        | Arith _ | Pred _ | Bool _ -> phi in
-      go phi
-      
+          App (go rename phi1, go rename phi2)
+        | Abs (x_, t) ->
+          let x = { x_ with id = S.Id.gen_id () } in
+          Abs (x, go (IdMap.add rename x_ x) t)
+        | Forall (x_, t) ->
+          let x = { x_ with id = S.Id.gen_id () } in
+          Forall (x, go (IdMap.add rename x_ x) t)
+        | Bool b -> Bool b
+        | Arith _ | Pred _ ->
+          let rename =
+            IdMap.filter_map
+              rename
+              ~f:(fun a ->
+                match a.S.Id.ty with
+                | TyInt -> Some (S.Hflz.Arith (S.Arith.Var ({a with ty=`Int})))
+                | TySigma _ -> None
+              ) in
+          hflz rename phi in
+      go IdMap.empty phi
     and hflz : 'ty S.Hflz.t env -> 'ty S.Hflz.t -> 'ty S.Hflz.t =
       fun env_ phi ->
         let rec hflz_ s_env b_env (phi : 'ty S.Hflz.t): 'ty S.Hflz.t = match phi with
           | Var x ->
               begin match IdMap.lookup s_env x with
-              | t -> rename_binding_if_necessary b_env t
+              | t -> rename_bindings t
               | exception Core.Not_found_s _ -> Var x
               end
           | Or(phi1,phi2)  ->
@@ -185,30 +189,6 @@ module Subst = struct
           | Bool _         -> phi
         in
         hflz_ env_ IdSet.empty phi
-
-    (** Invariant: phi must have type TyBool *)
-    let reduce_head : 'ty S.Hflz.hes -> 'ty S.Hflz.t -> 'ty S.Hflz.t =
-      fun hes phi -> match phi with
-      | Var x ->
-          begin match x.ty, List.find hes ~f:(fun rule -> S.Id.eq x rule.var) with
-          | TyBool _, Some phi -> phi.body
-          | _ -> invalid_arg "reduce_head"
-          end
-      | App(_, _) ->
-          let head, args = S.Hflz.decompose_app phi in
-          let vars, body =
-            match S.Hflz.decompose_abs head with
-            | vars0, Var x ->
-                let x_rule =
-                  List.find_exn hes ~f:(fun rule -> S.Id.eq x rule.var)
-                in
-                let vars1, body = S.Hflz.decompose_abs x_rule.body in
-                vars0@vars1, body
-            | vars, body -> vars, body
-          in
-          let env = IdMap.of_list @@ List.zip_exn vars args in
-          hflz env body
-      | _ -> invalid_arg "reduce_head"
   end
 
   module Hfl = struct
