@@ -11,6 +11,8 @@ let tractable_check_only = ref false
 
 let stop_if_intractable = ref false
 
+let z3_path = ref ""
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -102,6 +104,8 @@ type params =
   ; tractable_check_only: bool [@default false]
   
   ; stop_if_intractable : bool [@default false]
+  
+  ; z3_path : string [@default ""]
   }
   [@@deriving cmdliner,show]
 
@@ -120,6 +124,7 @@ let set_up_params params =
   set_ref Typing.no_disprove               params.no_disprove;
   set_ref tractable_check_only             params.tractable_check_only;
   set_ref stop_if_intractable              params.stop_if_intractable;
+  set_ref z3_path                          (if params.z3_path = "" then "z3" else params.z3_path);
   params.input
 
 (******************************************************************************)

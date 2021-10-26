@@ -56,7 +56,7 @@ let call_fptprove timeout file =
     | None -> "Failed", None
 
 let selected_cmd timeout = function
-  | `Spacer -> call_template [|"z3"; "fp.engine=spacer"|] timeout
+  | `Spacer -> call_template [|!Hflmc2_options.z3_path; "fp.engine=spacer"|] timeout
   | `Hoice -> call_template [|"hoice"|] timeout
   | `Fptprove -> call_fptprove timeout
   | _ -> failwith "you cannot use this"

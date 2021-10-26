@@ -6,7 +6,7 @@ let name_of_solver = function
   | `Z3 -> "z3"
 
 let selected_cmd = function
-  | `Z3 -> [|"z3" |]
+  | `Z3 -> [|!Hflmc2_options.z3_path|]
 
 let get_epilogue = function
   | `Z3 -> "\n(check-sat)\n"

@@ -47,6 +47,7 @@ let report_times () =
       end
 
 let main file =
+  Log.app begin fun m -> m ~header:"z3 path" "%s" !Hflmc2_options.z3_path end;
   let psi, _ = Syntax.parse_file file in
   Log.app begin fun m -> m ~header:"Input" "%a"
     Print.(hflz_hes simple_ty_) psi
