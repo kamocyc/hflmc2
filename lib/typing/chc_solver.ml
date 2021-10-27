@@ -41,15 +41,41 @@ let call_template cmd timeout =
     let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
     lsplit2_fst out ~on:'\n'
 
+let prepare_fptprove_script () =
+  let script_path = "/tmp/fptprove_launch_script.sh" in
+  let script = {|
+    cd $2
+    timeout=605 # +5 is dirty hack for setting timeout for each iteration to 600 sec
+    options='-p pcsp'
+    rand=$RANDOM
+    setsid /bin/bash -c "$2/script/para_aux.sh $timeout $2/_build/default/main.exe -c $2/config/solver/pcsat_dt.json $options $1 > /tmp/fptprove_output1$rand" &
+    pgid1=$!
+
+    trap "kill -TERM -$pgid1" EXIT
+
+    while :
+    do
+        alive1=$(ps -ef | grep " $pgid1 " | grep -v grep | awk '{ print $2 }')
+        if [ -z "$alive1" ]; then
+            cat /tmp/fptprove_output1$rand
+            break
+        fi
+        sleep 0.5
+    done
+  |} in
+  let oc = open_out script_path in
+  Printf.fprintf oc "%s" script;
+  close_out oc;
+  script_path
+
 let call_fptprove timeout file = 
   let open Hflmc2_util in
   let fptprove_path = 
     try Sys.getenv "fptprove" with
     | Not_found -> Filename.concat (Sys.getenv "HOME") "bitbucket.org/uhiro/fptprove"
   in
-  Sys.chdir fptprove_path;
-  (* TODO: fix path *)
-  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [[|fptprove_path ^ "/hflmc3.sh"|]; [|file|]]) in
+  let launch_script_path = prepare_fptprove_script () in
+  let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [[|"bash"|]; [|launch_script_path|]; [|file|]; [|fptprove_path|]]) in
   let l = String.split out ~on:',' in
   match List.nth l 1 with
     | Some(x) -> x, Some ""
