@@ -277,14 +277,20 @@ let rec infer hes env top =
   in 
   (* CHC Size is 1, then it is tractable *)
   (* size: intersection type size *)
-  let rec try_intersection_type chcs size =
+  let rec try_intersection_type chcs is_tractable =
     (* 
       if sat then return Valid
       if unsat then returns check_feasibility
     *)
-    match call_solver_with_timer chcs (Chc_solver.selected_solver 1) with
+    let solver =
+      if is_tractable then Chc_solver.selected_solver 1
+        else Chc_solver.(`Fptprove) in
+    match call_solver_with_timer chcs solver with
     | `Unsat when !Hflmc2_options.Typing.no_disprove -> `Unknown
-    | `Unsat -> check_feasibility chcs     
+    | `Unsat when not is_tractable ->
+      print_string "[Warning]Currently, we cannot disprove the validity when some definite clause has or-head\n";
+      `Unknown
+    | `Unsat -> check_feasibility chcs
     | `Sat(x) -> `Sat(x)
     | `Fail -> `Fail
     | `Unknown -> `Unknown
@@ -331,13 +337,13 @@ let rec infer hes env top =
           end;
           if !Hflmc2_options.tractable_check_only then raise ExnTractable;
           if size' > 1 then
-            call_solver_with_timer target Chc_solver.(`Fptprove)
+            try_intersection_type target false
           else
-            try_intersection_type target size'
+            try_intersection_type target true
         (*end*)
     end else begin
       if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-      try_intersection_type simplified size
+      try_intersection_type simplified true
     end
   in 
   let x = infer_main hes env top in
