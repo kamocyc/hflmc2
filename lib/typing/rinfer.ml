@@ -182,14 +182,19 @@ let rec infer_hes ?(track=false) (hes: hes) env (accum: (refinement, refinement)
   | rule::xs -> 
     infer_rule track rule env accum |> infer_hes ~track:track xs env 
 
-let rec print_hes = function
-  | [] -> ()
-  | hes_rule::xs -> 
-    print_string hes_rule.var.name;
-    print_string " ";
-    print_rtype hes_rule.var.ty;
-    print_newline ();
-    print_hes xs
+let pp_rule ppf rule =
+  Fmt.pf ppf "@[%a %a@]"
+    Hflmc2_syntax.Print.id rule.var
+    (pp_rtype Print.Prec.zero) rule.var.ty
+
+let pp_hes ppf hes =
+  Fmt.pf ppf "@[%a@]"
+    (Fmt.list ~sep:Format.pp_force_newline pp_rule) hes
+  
+let rec print_hes x =
+  pp_hes Fmt.stdout x;
+  Fmt.flush Fmt.stdout ();
+  print_newline ()
   
 let rec dnf_size = function
   | [] -> 0

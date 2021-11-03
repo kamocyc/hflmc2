@@ -15,22 +15,6 @@ let generate_top_template args  =
   else
     created := true;
     (id_top, args)
-  
-let rec print_ariths = function
-  | [] -> ()
-  | [x] -> 
-    Print.arith Fmt.stdout x;
-    Fmt.flush Fmt.stdout () ;
-  | x::xs ->
-    Print.arith Fmt.stdout x;
-    Fmt.flush Fmt.stdout () ;
-    print_string ",";
-    print_ariths xs
-
-let print_template (id, l) = 
-  Printf.printf "X%d(" id;
-  print_ariths l;
-  print_string ")"
 
 type rint =
   | RId of [`Int] Id.t
@@ -60,57 +44,66 @@ let rec clone_type_with_new_pred ints = function
     RArrow(clone_type_with_new_pred ints x, clone_type_with_new_pred ints y)
   | x -> x
 
-let print_rint = function
+let pp_comma : unit Fmt.t = fun ppf () -> Fmt.string ppf ","
+
+let pp_template ppf (id, l) = 
+  Fmt.pf ppf "@[X%d(@[<hv 0>%a@])@]"
+    id
+    (Fmt.list ~sep:pp_comma Print.arith) l
+
+let print_template x =
+  pp_template Fmt.stdout x;
+  Fmt.flush Fmt.stdout ()
+
+let pp_rint ppf = function
   | RId x -> 
-    Print.id Fmt.stdout x;
-    Fmt.flush Fmt.stdout () 
+    Print.id ppf x
   | RArith x -> 
-    Print.arith Fmt.stdout x;
-    Fmt.flush Fmt.stdout () 
+    Print.arith ppf x
 
-let rec print_refinement = function
-  | RTrue -> Printf.printf "tt"
-  | RFalse -> Printf.printf "ff"
-  | RPred (x,[f1; f2]) -> 
-    Print.arith Fmt.stdout f1;
-    Print.pred Fmt.stdout x;
-    Print.arith Fmt.stdout f2;
-    Fmt.flush Fmt.stdout () ;
-  | RPred (x,_) -> 
-    Print.pred Fmt.stdout x;
-    Fmt.flush Fmt.stdout () ;
+let rec pp_refinement prec ppf = function
+  | RTrue -> Fmt.string ppf "tt"
+  | RFalse -> Fmt.string ppf "ff"
+  | RPred (x, [f1; f2]) -> 
+    Print.show_paren (prec > Print.Prec.eq) ppf "@[<hv 0>%a@ %a@ %a@]"
+      Print.arith f1
+      Print.pred x
+      Print.arith f2
+  | RPred (x, _) -> 
+    Print.pred ppf x
   | RAnd(x, y) -> 
-    print_string "(";
-    print_refinement x; 
-    Printf.printf " /\\ "; 
-    print_refinement y;
-    print_string ")";
+    Print.show_paren (prec > Print.Prec.and_) ppf "@[<hv 0>%a@ /\\ %a@]"
+      (pp_refinement Print.Prec.and_) x
+      (pp_refinement Print.Prec.and_) y
   | ROr(x, y) -> 
-    print_string "(";
-    print_refinement x; 
-    Printf.printf " \\/ "; 
-    print_refinement y;
-    print_string ")";
+    Print.show_paren (prec > Print.Prec.or_) ppf "@[<hv 0>%a@ \\/ %a@]"
+      (pp_refinement Print.Prec.or_) x
+      (pp_refinement Print.Prec.or_) y
   | RExists (x, f) -> 
-    print_string "(";
-    print_string "∃";
-    Print.id Fmt.stdout x;
-    Fmt.flush Fmt.stdout ();
-    print_string ".";
-    print_refinement f;
-    print_string ")"
-  | RTemplate t -> print_template t
+    Print.show_paren (prec > Print.Prec.abs) ppf "@[<1>∃%a.@,%a@]"
+      Print.id x
+      (pp_refinement Print.Prec.abs) f
+  | RTemplate t -> pp_template ppf t
 
-let rec print_rtype = function
-  | RBool r -> Printf.printf "*["; print_refinement r; Printf.printf "]"
+let rec pp_rtype prec ppf = function
+  | RBool r ->
+    Fmt.pf ppf "*[@[<1>%a@]]"
+      (pp_refinement Print.Prec.zero) r
   | RArrow(x, y) ->
-    print_string "(";
-    print_rtype x;
-    Printf.printf " -> ";
-    print_rtype y;
-    print_string ")";
-  | RInt x -> Printf.printf "int("; print_rint x; Printf.printf ")"
+    Print.show_paren (prec > Print.Prec.arrow) ppf "@[<1>%a ->@ %a@]"
+      (pp_rtype Print.Prec.(succ arrow)) x
+      (pp_rtype Print.Prec.arrow) y
+  | RInt x ->
+    Fmt.pf ppf "@[int(@[<1>%a@])@]"
+      pp_rint x
 
+let print_rtype x =
+  pp_rtype (Print.Prec.zero) Fmt.stdout x;
+  Fmt.flush Fmt.stdout ()
+
+let print_refinement x =
+  pp_refinement (Print.Prec.zero) Fmt.stdout x;
+  Fmt.flush Fmt.stdout ()
   
 let rint2arith = function
   | RId x -> Arith.Var(x)
