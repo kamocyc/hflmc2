@@ -205,13 +205,54 @@ let rec dnf_size = function
 
 let simplify = normalize
 
-let print_derived_refinement_type hes constraints = 
+let formula_to_refinement fml =
+  let rec go fml = match fml with
+    | Formula.Bool true -> RTrue
+    | Bool false -> RFalse
+    | Var _ -> assert false
+    | Or fs ->
+      let rec g = function
+        | [x] -> go x
+        | x::xs -> ROr (go x, g xs)
+        | [] -> assert false
+      in
+      g fs
+    | And fs ->
+      let rec g = function
+        | [x] -> go x
+        | x::xs -> RAnd (go x, g xs)
+        | [] -> assert false
+      in
+      g fs
+    | Pred (p, as') ->
+      RPred (p, as')
+  in
+  go fml
+  
+let print_derived_refinement_type (anno_env : (('a, [ `Int ] Id.t) Formula.gen_t * [ `Int ] Id.t list) Rid.M.t) hes constraints = 
   let rec gen_name_type_map constraints m = match constraints with
     | [] -> m
     | (id, args, body)::xs -> 
       m |> Rid.M.add id (args, body) |> gen_name_type_map xs
   in
   let m = gen_name_type_map constraints Rid.M.empty in
+  let m' =
+    Rid.M.map
+      (fun (fml, args) ->
+        (args, formula_to_refinement fml)
+      )
+      anno_env
+  in
+  let m =
+    Rid.M.merge
+      (fun _i a b ->
+        match a, b with
+        | Some x, None | None, Some x -> Some x
+        | Some a, Some _ -> Some a
+        | None, None -> assert false
+      )
+      m
+      m' in
   let rec subst_ids map t = 
     match map with 
     | [] -> t
@@ -359,7 +400,7 @@ let rec infer anno_env hes env top =
         match x with 
         | Ok(x) -> 
           let open Hflmc2_options in
-          let hes = print_derived_refinement_type hes x in
+          let hes = print_derived_refinement_type anno_env hes x in
           if !Typing.show_refinement then
             print_hes hes
           else 

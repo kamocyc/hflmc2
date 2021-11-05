@@ -28,22 +28,25 @@ let simplify_body acc args body =
   let to_simplify = List [Atom "assert"; body] in
   (* Repeat application of ctx-solver-simplify may result in further simplificaion. *)
   let body = acc ^ "\n" ^ args ^ "\n" ^ (to_string to_simplify) ^ "\n(apply (then ctx-solver-simplify qe ctx-solver-simplify ctx-solver-simplify ctx-solver-simplify))" in
-  let s = (save_file body) in
+  let s = save_file body in
   (* print_endline @@ "file: " ^ s; *)
   let output_path = get_random_file_name () in
   (* these options prevent z3 from using "let" expressions *)
-  ignore @@ Unix.system @@ !Hflmc2_options.z3_path ^ " " ^ s ^ " pp.max_depth=10000 pp.min-alias-size=10000 > " ^ output_path;
+  let command = !Hflmc2_options.z3_path ^ " " ^ s ^ " pp.max_depth=10000 pp.min-alias-size=10000 > " ^ output_path in
+  print_endline @@ "simplifing command: " ^ command;
+  ignore @@ Unix.system command;
   let s = read_file output_path in
   match Sexplib.Sexp.parse s with
   | Done (model, _) -> begin
     match model with
     | List [Atom "goals"; List (Atom "goal"::xs)] -> begin
       let xs = List.filter ~f:(fun x -> match x with
-        | (Atom _) -> (
-          (* print_endline ("atom: " ^ s ^ ", skip"); *)
-          false
-        )
-        | _ -> true
+        | Atom s -> begin
+          match s with
+          | "true" | "false" -> true
+          | _ -> (* print_endline ("atom: " ^ s ^ ", skip"); *) false
+        end
+        | _ -> (* print_endline "not atom"; *) true
       ) xs in
       let body = 
         match xs with
