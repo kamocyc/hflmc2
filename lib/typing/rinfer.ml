@@ -229,13 +229,15 @@ let formula_to_refinement fml =
   in
   go fml
   
-let print_derived_refinement_type (anno_env : (('a, [ `Int ] Id.t) Formula.gen_t * [ `Int ] Id.t list) Rid.M.t) hes constraints = 
+let print_derived_refinement_type is_dual_chc (anno_env : (('a, [ `Int ] Id.t) Formula.gen_t * [ `Int ] Id.t list) Rid.M.t) hes constraints = 
   let rec gen_name_type_map constraints m = match constraints with
     | [] -> m
     | (id, args, body)::xs -> 
       m |> Rid.M.add id (args, body) |> gen_name_type_map xs
   in
-  let m = gen_name_type_map constraints Rid.M.empty in
+  let m =
+    gen_name_type_map constraints Rid.M.empty
+    |> Rid.M.map (fun (args, fml) -> args, if is_dual_chc then Rtype.dual fml else fml) in
   let m' =
     Rid.M.map
       (fun (fml, args) ->
@@ -285,6 +287,14 @@ let print_derived_refinement_type (anno_env : (('a, [ `Int ] Id.t) Formula.gen_t
 
 exception ExnTractable
 exception ExnIntractable
+
+let dual_environment env =
+  Rid.M.map
+    (fun (fml, args) ->
+      let fml = Formula.mk_not fml in
+      (fml, args)
+    )
+    env
 
 (* Algorithm
 Input: hes(simply typed) env top
@@ -357,42 +367,41 @@ let rec infer anno_env hes env top =
 
     if size > 1 then begin
       let dual = List.map Chc.dual constraints in
-      let simplified' = simplify dual in
-      let size_dual = dnf_size simplified' in
+      let simplified_dual = simplify dual in
+      let size_dual = dnf_size simplified_dual in
       Printf.printf "[Dual Size] %d\n" size_dual;
-      let size' = if size < size_dual then size else size_dual in
-      let target = if size < size_dual then simplified else simplified' in
+      let min_size = if size < size_dual then size else size_dual in
+      let target = if size < size_dual then simplified else simplified_dual in
+      let use_dual = size >= size_dual in
+      let anno_env = if use_dual then dual_environment anno_env else anno_env in
 
-      let target' = expand target in
+      (* let target' = expand target in
       print_string "remove or or\n";
-      print_constraints target';
+      print_constraints target'; *)
       (* 3. check satisfiability *)
       (*match call_solver_with_timer target' (Chc_solver.selected_solver 1) with
       | `Sat(x) -> `Sat(x)
       | `Fail -> failwith "hoge"
       | _ ->
         begin*)
-          if size > 1 && size_dual > 1 then begin
-            if !Hflmc2_options.tractable_check_only then
-              raise ExnIntractable
-            else begin
-              print_string "[Warning]Some definite clause has or-head\n";
-              (if !Hflmc2_options.stop_if_intractable then
-                raise ExnIntractable)
-            end
-          end;
-          if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-          if size' > 1 then
-            try_intersection_type anno_env target false
-          else
-            try_intersection_type anno_env target true
-        (*end*)
-    end else begin
+      if min_size > 1 then begin
+        (* if size > 1 /\ dual_size > 1 *)
+        if !Hflmc2_options.tractable_check_only then raise ExnIntractable;
+        print_string "[Warning]Some definite clause has or-head\n";
+        if !Hflmc2_options.stop_if_intractable then raise ExnIntractable;
+        use_dual, try_intersection_type anno_env target false
+      end else begin
+        (* if dual_size <= 1 *)
+        if !Hflmc2_options.tractable_check_only then raise ExnTractable;
+        use_dual, try_intersection_type anno_env target true
+      end
+      (*end*)
+    end else begin (* if size <= 1 *)
       if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-      try_intersection_type anno_env simplified true
+      false, try_intersection_type anno_env simplified true
     end
   in 
-  let x = infer_main hes env top in
+  let is_dual_chc, x = infer_main hes env top in
   report_times ();
   match x with
   | `Sat(x) -> 
@@ -400,7 +409,7 @@ let rec infer anno_env hes env top =
         match x with 
         | Ok(x) -> 
           let open Hflmc2_options in
-          let hes = print_derived_refinement_type anno_env hes x in
+          let hes = print_derived_refinement_type is_dual_chc anno_env hes x in
           if !Typing.show_refinement then
             print_hes hes
           else 
