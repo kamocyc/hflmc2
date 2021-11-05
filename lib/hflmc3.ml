@@ -48,7 +48,11 @@ let report_times () =
 
 let main file =
   Log.app begin fun m -> m ~header:"z3 path" "%s" !Hflmc2_options.z3_path end;
-  let psi, _ = Syntax.parse_file file in
+  let psi, anno_env = Syntax.parse_file file in
+  let anno_env =
+    if !Options.use_annotation then
+      anno_env
+    else IdMap.empty in
   Log.app begin fun m -> m ~header:"Input" "%a"
     Print.(hflz_hes simple_ty_) psi
   end;
@@ -59,7 +63,7 @@ let main file =
   let psi, top = Syntax.Trans.Preprocess.main psi in
   match top with
   | Some(top) -> begin
-    match Typing.main psi top with
+    match Typing.main anno_env psi top with
     | `Sat ->  `Valid
     | `Unsat ->  `Invalid
     | `Unknown -> `Unknown

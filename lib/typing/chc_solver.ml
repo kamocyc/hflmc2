@@ -48,7 +48,7 @@ let call_fptprove timeout file =
     | Not_found -> Filename.concat (Sys.getenv "HOME") "bitbucket.org/uhiro/fptprove"
   in
   let launch_script_path = Script.prepare_fptprove_script () in
-  let _, out, _ = Fn.run_command ~timeout:timeout [|"bash"; launch_script_path; file; fptprove_path; string_of_int ((int_of_float timeout) + 5)|] in
+  let _, out, _ = Fn.run_command ~timeout:timeout [|"bash"; launch_script_path; file; fptprove_path; string_of_int ((int_of_float timeout) + 5); !Hflmc2_options.pcsat_config|] in
   let l = String.split out ~on:',' in
   match List.nth l 1 with
     | Some(x) -> x, Some ""
@@ -130,13 +130,22 @@ let gen_assert solver chc =
   if vars_s = "" && (solver == `Spacer || solver == `Fptprove || solver == `Eldarica) then
     Printf.sprintf "(assert %s)\n" s
   else
-    Printf.sprintf "(assert (forall (%s) %s))\n" vars_s s
-
-let chc2smt2 chcs solver = 
+    Printf.sprintf "(assert (forall (%s) %s))\n" vars_s s  
+  
+let chc2smt2 env chcs solver = 
   let preds = collect_preds chcs Rid.M.empty in
+  let preds =
+    Rid.M.filter
+      (fun id _ ->
+        match Rid.M.find_opt id env with
+        | Some _ -> false
+        | None -> true
+      )
+      preds in
   let def = preds |> Rid.M.bindings |> List.map pred_def |> List.fold_left (^) "" in
+  let concrete_def = env |> Rid.M.bindings |> List.map pred_concrete_def |> List.fold_left (^) "" in
   let body = chcs |> List.map (gen_assert solver) |> List.fold_left (^) "" in
-  prologue ^ def ^ body ^ (get_epilogue solver)
+  prologue ^ def ^ concrete_def ^ body ^ (get_epilogue solver)
 
 
 let parse_model model = 
@@ -233,11 +242,11 @@ let parse_model model =
         (id, args, body)
     | s -> fail "parse_def" s
   in
-  (* print_endline "Before model simplification:";
-  print_endline model; *)
+  print_endline "Before model simplification:";
+  print_endline model;
   let model = Simplify_model.simplify_model model in
-  (* print_endline "After model simplification:";
-  print_endline model; *)
+  print_endline "After model simplification:";
+  print_endline model;
   match Sexplib.Sexp.parse model with
   | Done(model, _) -> begin 
     match model with
@@ -247,8 +256,8 @@ let parse_model model =
     end
   | _ -> Error "failed to parse model"
 
-let save_chc_to_smt2 chcs solver = 
-    let smt2 = chc2smt2 chcs solver in
+let save_chc_to_smt2 env chcs solver = 
+    let smt2 = chc2smt2 env chcs solver in
     Random.self_init ();
     let r = Random.int 0x10000000 in
     let file = Printf.sprintf "/tmp/%s-%d.smt2" (name_of_solver solver) r in
@@ -257,9 +266,9 @@ let save_chc_to_smt2 chcs solver =
     close_out oc;
     file
 
-let check_sat ?(timeout=100000.0) chcs solver = 
+let check_sat ?(timeout=100000.0) env chcs solver = 
   let check_sat_inner timeout solver = 
-    let file = save_chc_to_smt2 chcs solver in
+    let file = save_chc_to_smt2 env chcs solver in
     let open Hflmc2_util in
     let f = selected_cmd timeout solver in
     match f file with
@@ -303,9 +312,9 @@ let rec unsat_proof_of_eldarica_cex nodes =
                 Rid.from_string Dag.(x.head);
               args=Dag.(x.args);
               nodes=[];}::(unsat_proof_of_eldarica_cex xs) (* TODO *)
-let get_unsat_proof ?(timeout=100.0) chcs solver = 
+let get_unsat_proof ?(timeout=100.0) env chcs solver = 
   let open Hflmc2_util in
-  let file = save_chc_to_smt2 chcs solver in
+  let file = save_chc_to_smt2 env chcs solver in
   let cmd = selected_cex_cmd solver in
   let _, out, _ = Fn.run_command ~timeout:timeout (Array.concat [cmd; [|file|]]) in
   let p = Eldarica.parse_string out in

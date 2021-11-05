@@ -183,7 +183,7 @@ let rec infer_hes ?(track=false) (hes: hes) env (accum: (refinement, refinement)
     infer_rule track rule env accum |> infer_hes ~track:track xs env 
 
 let pp_rule ppf rule =
-  Fmt.pf ppf "@[%a %a@]"
+  Fmt.pf ppf "@[%a : %a.@]"
     Hflmc2_syntax.Print.id rule.var
     (pp_rtype Print.Prec.zero) rule.var.ty
 
@@ -263,18 +263,18 @@ if unsat then returns check_feasibility
 4. if the input is evaluated to false then returns Invalid
 5. otherwise; returns Unknown
 *)
-let rec infer hes env top = 
+let rec infer anno_env hes env top = 
   let hes = List.map (fun x -> 
     let open Rhflz in 
      {x with body=Rhflz.translate_if x.body}) hes 
   in
-  let call_solver_with_timer hes solver = 
+  let call_solver_with_timer anno_env hes solver = 
     add_mesure_time "CHC Solver" @@ fun () ->
-    Chc_solver.check_sat hes solver
+    Chc_solver.check_sat anno_env hes solver
   in
-  let check_feasibility chcs = 
+  let check_feasibility anno_env chcs = 
     (* 1. generate constraints by using predicates for tracking cex *)
-    let p = Chc_solver.get_unsat_proof chcs `Eldarica in
+    let p = Chc_solver.get_unsat_proof anno_env chcs `Eldarica in
     let open Disprove in
     match disprove p hes env top with
     | `Invalid -> `Unsat
@@ -282,7 +282,7 @@ let rec infer hes env top =
   in 
   (* CHC Size is 1, then it is tractable *)
   (* size: intersection type size *)
-  let rec try_intersection_type chcs is_tractable =
+  let rec try_intersection_type anno_env chcs is_tractable =
     (* 
       if sat then return Valid
       if unsat then returns check_feasibility
@@ -290,12 +290,12 @@ let rec infer hes env top =
     let solver =
       if is_tractable then Chc_solver.selected_solver 1
         else Chc_solver.(`Fptprove) in
-    match call_solver_with_timer chcs solver with
+    match call_solver_with_timer anno_env chcs solver with
     | `Unsat when !Hflmc2_options.Typing.no_disprove -> `Unknown
     | `Unsat when not is_tractable ->
       print_string "[Warning]Currently, we cannot disprove the validity when some definite clause has or-head\n";
       `Unknown
-    | `Unsat -> check_feasibility chcs
+    | `Unsat -> check_feasibility anno_env chcs
     | `Sat(x) -> `Sat(x)
     | `Fail -> `Fail
     | `Unknown -> `Unknown
@@ -342,13 +342,13 @@ let rec infer hes env top =
           end;
           if !Hflmc2_options.tractable_check_only then raise ExnTractable;
           if size' > 1 then
-            try_intersection_type target false
+            try_intersection_type anno_env target false
           else
-            try_intersection_type target true
+            try_intersection_type anno_env target true
         (*end*)
     end else begin
       if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-      try_intersection_type simplified true
+      try_intersection_type anno_env simplified true
     end
   in 
   let x = infer_main hes env top in

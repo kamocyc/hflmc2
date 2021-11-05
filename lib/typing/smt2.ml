@@ -10,7 +10,7 @@ let rec gen_len_args len =
 let pred_def (name, len) =
   gen_len_args len |> Printf.sprintf "(declare-fun %s (%s) Bool)\n" (Rid.to_string name)
 
-let var_def id = id |> Id.to_string |> Printf.sprintf "(%s Int)"
+let var_def id = id |> Id.to_string |> Printf.sprintf "(%s Int)"    
 
 let op2smt2 = 
   let open Arith in
@@ -64,6 +64,7 @@ let rec ref2smt2 rt = match rt with
   | ROr(x, y) -> Printf.sprintf "(or %s %s)" (ref2smt2 x) (ref2smt2 y)
   | RTemplate(p, l) -> template2smt2 (p, l)
   | RPred(p, l) -> pred2smt2(p, l)
+  | RExists _ -> assert false
 
 let rec fpl2smt2 fml = 
   let open Fpl in
@@ -75,3 +76,33 @@ let rec fpl2smt2 fml =
   | Forall(x, y) -> 
     Printf.sprintf "(forall ((%s Int)) %s)" (Id.to_string x) (fpl2smt2 y)
   | Pred(p, l) -> pred2smt2(p, l)
+
+
+  (* (define-fun X2
+    ( (v_0 Int) (v_1 Int) ) Bool
+    (and (>= v_1 1) (>= (+ v_1 ( * (- 1) v_0)) 1))
+  ) *)
+
+let rec formula2smt2 fml = 
+  match fml with
+  | Formula.And fs -> Printf.sprintf "(and %s)" (List.map formula2smt2 fs |> String.concat " ")
+  | Formula.Or fs -> Printf.sprintf "(or %s)" (List.map formula2smt2 fs |> String.concat " ")
+  | Formula.Var _ -> assert false
+  | Formula.Bool b -> begin
+    match b with
+    | true -> "true"
+    | false -> "false"
+  end
+  | Formula.Pred (p, l) -> pred2smt2 (p, l)
+  
+(*  Rid.M.t *)
+let pred_concrete_def ((name, (fml, args)) : (int * (('a, [`Int] Id.t) Hflmc2_syntax.Formula.gen_t * [`Int] Id.t list))) =
+  let rec go args =
+    match args with
+    | arg::args -> ("(" ^ Id.to_string arg ^ " Int)") :: go args
+    | [] -> []
+  in
+  Printf.sprintf "(define-fun %s ( %s ) Bool %s)\n"
+    (Rid.to_string name)
+    (go args |> String.concat " ")
+    (formula2smt2 fml)

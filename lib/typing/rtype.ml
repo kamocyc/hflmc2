@@ -62,8 +62,8 @@ let pp_rint ppf = function
     Print.arith ppf x
 
 let rec pp_refinement prec ppf = function
-  | RTrue -> Fmt.string ppf "tt"
-  | RFalse -> Fmt.string ppf "ff"
+  | RTrue -> Fmt.string ppf "true"
+  | RFalse -> Fmt.string ppf "false"
   | RPred (x, [f1; f2]) -> 
     Print.show_paren (prec > Print.Prec.eq) ppf "@[<hv 0>%a@ %a@ %a@]"
       Print.arith f1
@@ -87,14 +87,14 @@ let rec pp_refinement prec ppf = function
 
 let rec pp_rtype prec ppf = function
   | RBool r ->
-    Fmt.pf ppf "*[@[<1>%a@]]"
+    Fmt.pf ppf "bool[@[<1>%a@]]"
       (pp_refinement Print.Prec.zero) r
   | RArrow(x, y) ->
     Print.show_paren (prec > Print.Prec.arrow) ppf "@[<1>%a ->@ %a@]"
       (pp_rtype Print.Prec.(succ arrow)) x
       (pp_rtype Print.Prec.arrow) y
   | RInt x ->
-    Fmt.pf ppf "@[int(@[<1>%a@])@]"
+    Fmt.pf ppf "@[%a:int@]"
       pp_rint x
 
 let print_rtype x =

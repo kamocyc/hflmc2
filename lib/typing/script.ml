@@ -78,7 +78,7 @@ let prepare_fptprove_script () =
     timeout=$3
     options='-p pcsp'
     rand=$RANDOM
-    setsid /bin/bash -c "/bin/bash |} ^ sub_script_path ^ {| $timeout $2/_build/default/main.exe -c $2/config/solver/pcsat_dt.json $options $1 > /tmp/fptprove_output1$rand" &
+    setsid /bin/bash -c "/bin/bash |} ^ sub_script_path ^ {| $timeout $2/_build/default/main.exe -c $2/config/$4 $options $1 > /tmp/fptprove_output1$rand" &
     pgid1=$!
 
     trap "kill -TERM -$pgid1" EXIT

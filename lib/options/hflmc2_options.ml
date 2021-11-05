@@ -13,6 +13,10 @@ let stop_if_intractable = ref false
 
 let z3_path = ref ""
 
+let pcsat_config = ref ""
+
+let use_annotation = ref false
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -105,7 +109,14 @@ type params =
   
   ; stop_if_intractable : bool [@default false]
   
-  ; z3_path : string [@default ""]
+  ; z3_path : string [@default "z3"]
+  (** path of z3 **)
+  
+  ; pcsat_config : string [@default "solver/pcsat_dt.json"]
+  (** path of config for pcsat **)
+  
+  ; use_annotation : bool [@default false]
+  (* use annotations in %ENV section to solve a formula *)
   }
   [@@deriving cmdliner,show]
 
@@ -124,7 +135,9 @@ let set_up_params params =
   set_ref Typing.no_disprove               params.no_disprove;
   set_ref tractable_check_only             params.tractable_check_only;
   set_ref stop_if_intractable              params.stop_if_intractable;
-  set_ref z3_path                          (if params.z3_path = "" then "z3" else params.z3_path);
+  set_ref z3_path                          params.z3_path;
+  set_ref pcsat_config                     params.pcsat_config;
+  set_ref use_annotation                   params.use_annotation;
   params.input
 
 (******************************************************************************)
