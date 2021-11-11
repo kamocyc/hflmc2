@@ -25,14 +25,20 @@ let name_of_solver = function
 
 let auto = `Auto(`Hoice, [])
 
-let selected_solver size = 
+let selected_solver is_tractable = 
   let sv = !Typing.solver in
-  if size > 1 then `Fptprove
-  else if sv = "auto" then auto
-  else if sv = "z3" || sv = "spacer" then `Spacer
-  else if sv = "hoice" then `Hoice
-  else if sv = "fptprove" then `Fptprove
-  else failwith ("Unknown solver: " ^ sv)
+  let solver =
+    if sv = "auto" then auto
+    else if sv = "z3" || sv = "spacer" then `Spacer
+    else if sv = "hoice" then `Hoice
+    else if sv = "fptprove" then `Fptprove
+    else if sv = "liu" || sv = "hoice-haskell" || sv = "hoice-ex" then `Liu
+    else failwith ("Unknown solver: " ^ sv)
+  in
+  if not is_tractable && solver != `Fptprove && solver != `Liu then
+    `Fptprove
+  else
+    solver
 
 (* set of template *)
 let call_template cmd timeout = 
@@ -54,10 +60,31 @@ let call_fptprove timeout file =
     | Some(x) -> x, Some ""
     | None -> "Failed", None
 
+let call_liu_solver timeout file =
+  let open Hflmc2_util in
+  let solver_path = 
+    try Sys.getenv "liu_solver" with
+    | Not_found -> failwith "Error: the environment variable \"liu_solver\" is not set" 
+  in
+  (* let _, out, _ = Fn.run_command ~timeout:timeout [|solver_path; "--preproc"; file|] in *)
+  let _, out, _ = Fn.run_command ~timeout:timeout [|solver_path; file|] in
+  let reg_time = Str.regexp "^solve time" in
+  let reg_sat = Str.regexp "^Satisfied" in
+  try (
+    ignore @@ Str.search_forward reg_time out 0;
+    try
+      ignore @@ Str.search_forward reg_sat out 0;
+      "sat", Some ""
+    with
+      | Not_found -> "unsat", None
+  ) with
+    | Not_found -> "Failed", None
+  
 let selected_cmd timeout = function
   | `Spacer -> call_template [|!Hflmc2_options.z3_path; "fp.engine=spacer"|] timeout
   | `Hoice -> call_template [|"hoice"|] timeout
-  | `Fptprove -> call_fptprove timeout
+  | `Fptprove -> call_fptprove timeout  
+  | `Liu -> call_liu_solver timeout
   | _ -> failwith "you cannot use this"
   
 let selected_cex_cmd = function
@@ -79,7 +106,7 @@ let get_epilogue =
     "\
     (check-sat)
     "
-  | `Hoice ->
+  | `Hoice | `Liu ->
     "\
     (check-sat)
     (get-model)
@@ -127,7 +154,7 @@ let gen_assert solver chc =
   let body = ref2smt2 chc.body in
   let head = ref2smt2 chc.head in
   let s = Printf.sprintf "(=> %s %s)" body head in
-  if vars_s = "" && (solver == `Spacer || solver == `Fptprove || solver == `Eldarica) then
+  if vars_s = "" && (solver == `Spacer || solver == `Fptprove || solver == `Eldarica || solver == `Liu) then
     Printf.sprintf "(assert %s)\n" s
   else
     Printf.sprintf "(assert (forall (%s) %s))\n" vars_s s  
@@ -298,7 +325,7 @@ let check_sat ?(timeout=100000.0) env chcs solver =
           | _ -> loop xs
         end
     in loop tries
-  | `Spacer | `Hoice | `Fptprove as sv -> check_sat_inner timeout sv
+  | `Spacer | `Hoice | `Fptprove | `Liu as sv -> check_sat_inner timeout sv
 
 (* usp: unsat proof *)
 let rec unsat_proof_of_eldarica_cex nodes = 

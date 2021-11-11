@@ -17,6 +17,8 @@ let pcsat_config = ref ""
 
 let use_annotation = ref false
 
+let solve_dual = ref ""
+
 module Preprocess = struct
   let inlining = ref (Obj.magic())
 end
@@ -116,7 +118,10 @@ type params =
   (** path of config for pcsat **)
   
   ; use_annotation : bool [@default false]
-  (* use annotations in %ENV section to solve a formula *)
+  (** use annotations in %ENV section to solve a formula *)
+  
+  ; solve_dual : string [@default "auto"]
+  (** "auto" (default): automatically solve dual or non-dual chc, depends on the sizes of the dual and non-dual chc / "dual": solve dual chc / "non-dual": solve non-dual chc / "auto-conservative" : solve non-dual chc, unless the non-dual chc is extended chc and the dual chc is not *)
   }
   [@@deriving cmdliner,show]
 
@@ -138,6 +143,7 @@ let set_up_params params =
   set_ref z3_path                          params.z3_path;
   set_ref pcsat_config                     params.pcsat_config;
   set_ref use_annotation                   params.use_annotation;
+  set_ref solve_dual                       params.solve_dual;
   params.input
 
 (******************************************************************************)

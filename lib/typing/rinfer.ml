@@ -338,9 +338,7 @@ let rec infer anno_env hes env top =
       if sat then return Valid
       if unsat then returns check_feasibility
     *)
-    let solver =
-      if is_tractable then Chc_solver.selected_solver 1
-        else Chc_solver.(`Fptprove) in
+    let solver = Chc_solver.selected_solver is_tractable in
     match call_solver_with_timer anno_env chcs solver with
     | `Unsat when !Hflmc2_options.Typing.no_disprove -> `Unknown
     | `Unsat when not is_tractable ->
@@ -365,40 +363,86 @@ let rec infer anno_env hes env top =
     let size = dnf_size simplified in
     Printf.printf "[Size] %d\n" size;
 
-    if size > 1 then begin
-      let dual = List.map Chc.dual constraints in
-      let simplified_dual = simplify dual in
+    
+    if !Hflmc2_options.tractable_check_only then (
+      if size = 1 then raise ExnTractable;
+      let simplified_dual = List.map Chc.dual constraints |> simplify in
       let size_dual = dnf_size simplified_dual in
-      Printf.printf "[Dual Size] %d\n" size_dual;
-      let min_size = if size < size_dual then size else size_dual in
-      let target = if size < size_dual then simplified else simplified_dual in
-      let use_dual = size >= size_dual in
-      let anno_env = if use_dual then dual_environment anno_env else anno_env in
+      if size_dual = 1 then raise ExnTractable;
+      raise ExnIntractable
+    );
+    
+    if !Hflmc2_options.solve_dual = "auto" then begin
+      if size > 1 then begin
+        let simplified_dual = List.map Chc.dual constraints |> simplify in
+        let size_dual = dnf_size simplified_dual in
+        Printf.printf "[Dual Size] %d\n" size_dual;
+        let min_size = if size < size_dual then size else size_dual in
+        let target = if size < size_dual then simplified else simplified_dual in
+        let use_dual = size >= size_dual in
+        let anno_env = if use_dual then dual_environment anno_env else anno_env in
 
-      (* let target' = expand target in
-      print_string "remove or or\n";
-      print_constraints target'; *)
-      (* 3. check satisfiability *)
-      (*match call_solver_with_timer target' (Chc_solver.selected_solver 1) with
-      | `Sat(x) -> `Sat(x)
-      | `Fail -> failwith "hoge"
-      | _ ->
-        begin*)
-      if min_size > 1 then begin
-        (* if size > 1 /\ dual_size > 1 *)
-        if !Hflmc2_options.tractable_check_only then raise ExnIntractable;
+        (* let target' = expand target in
+        print_string "remove or or\n";
+        print_constraints target'; *)
+        (* 3. check satisfiability *)
+        (*match call_solver_with_timer target' (Chc_solver.selected_solver 1) with
+        | `Sat(x) -> `Sat(x)
+        | `Fail -> failwith "hoge"
+        | _ ->
+          begin*)
+        if min_size > 1 then begin
+          (* if size > 1 /\ dual_size > 1 *)
+          print_string "[Warning]Some definite clause has or-head\n";
+          if !Hflmc2_options.stop_if_intractable then raise ExnIntractable;
+          use_dual, try_intersection_type anno_env target false
+        end else begin
+          (* if dual_size <= 1 *)
+          use_dual, try_intersection_type anno_env target true
+        end
+        (*end*)
+      end else begin (* if size <= 1 *)
+        false, try_intersection_type anno_env simplified true
+      end
+    end else if !Hflmc2_options.solve_dual = "auto-conservative" then begin
+      if size > 1 then begin
+        let simplified_dual = List.map Chc.dual constraints |> simplify in
+        let size_dual = dnf_size simplified_dual in
+        Printf.printf "[Dual Size] %d\n" size_dual;
+        if size_dual <= 1 then
+          (* if dual_size <= 1 *)
+          true, try_intersection_type anno_env simplified_dual true
+        else begin
+          print_string "[Warning]Some definite clause has or-head\n";
+          if !Hflmc2_options.stop_if_intractable then raise ExnIntractable;
+          false, try_intersection_type anno_env simplified false
+        end
+      end else begin (* if size <= 1 *)
+        false, try_intersection_type anno_env simplified true
+      end
+    end else if !Hflmc2_options.solve_dual = "dual" then begin
+      print_endline "solve dual";
+      let target = List.map Chc.dual constraints |> simplify in
+      let size_dual = dnf_size target in
+      Printf.printf "[Dual Size] %d\n" size_dual;
+      let anno_env = dual_environment anno_env in
+      if size_dual > 1 then begin
         print_string "[Warning]Some definite clause has or-head\n";
         if !Hflmc2_options.stop_if_intractable then raise ExnIntractable;
-        use_dual, try_intersection_type anno_env target false
+        true, try_intersection_type anno_env target false
       end else begin
-        (* if dual_size <= 1 *)
-        if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-        use_dual, try_intersection_type anno_env target true
+        true, try_intersection_type anno_env target true
       end
-      (*end*)
-    end else begin (* if size <= 1 *)
-      if !Hflmc2_options.tractable_check_only then raise ExnTractable;
-      false, try_intersection_type anno_env simplified true
+    end else begin
+      assert (!Hflmc2_options.solve_dual = "non-dual");
+      print_endline "non-dual";
+      if size > 1 then begin
+        print_string "[Warning]Some definite clause has or-head\n";
+        if !Hflmc2_options.stop_if_intractable then raise ExnIntractable;
+        false, try_intersection_type anno_env simplified false
+      end else begin
+        false, try_intersection_type anno_env simplified true
+      end
     end
   in 
   let is_dual_chc, x = infer_main hes env top in
