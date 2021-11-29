@@ -61,16 +61,26 @@ let pp_rint ppf = function
   | RArith x -> 
     Print.arith ppf x
 
+
+let rtype_pred : Formula.pred Fmt.t =
+  fun ppf pred -> match pred with
+    | Eq  -> Fmt.string ppf "="
+    | Neq -> Fmt.string ppf "!="
+    | Le  -> Fmt.string ppf "<="
+    | Ge  -> Fmt.string ppf ">="
+    | Lt  -> Fmt.string ppf "<"
+    | Gt  -> Fmt.string ppf ">"
+  
 let rec pp_refinement prec ppf = function
   | RTrue -> Fmt.string ppf "true"
   | RFalse -> Fmt.string ppf "false"
   | RPred (x, [f1; f2]) -> 
     Print.show_paren (prec > Print.Prec.eq) ppf "@[<hv 0>%a@ %a@ %a@]"
       Print.arith f1
-      Print.pred x
+      rtype_pred x
       Print.arith f2
   | RPred (x, _) -> 
-    Print.pred ppf x
+    rtype_pred ppf x
   | RAnd(x, y) -> 
     Print.show_paren (prec > Print.Prec.and_) ppf "@[<hv 0>%a@ /\\ %a@]"
       (pp_refinement Print.Prec.and_) x
@@ -86,9 +96,12 @@ let rec pp_refinement prec ppf = function
   | RTemplate t -> pp_template ppf t
 
 let rec pp_rtype prec ppf = function
-  | RBool r ->
+  | RBool r -> begin
+    if prec = Print.Prec.(succ arrow) then Fmt.string ppf "(";
     Fmt.pf ppf "bool[@[<1>%a@]]"
-      (pp_refinement Print.Prec.zero) r
+      (pp_refinement Print.Prec.zero) r;
+    if prec = Print.Prec.(succ arrow) then Fmt.string ppf ")";
+  end
   | RArrow(x, y) ->
     Print.show_paren (prec > Print.Prec.arrow) ppf "@[<1>%a ->@ %a@]"
       (pp_rtype Print.Prec.(succ arrow)) x

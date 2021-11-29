@@ -71,7 +71,7 @@ let simplify_model model =
   match Sexplib.Sexp.parse model with
   | Done(model, _) -> begin 
     match model with
-    | List (Atom "model" :: sol) -> begin
+    | List (Atom "model" :: sol) | List sol -> begin
       let r = 
         List.fold_left
           sol

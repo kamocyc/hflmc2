@@ -82,7 +82,7 @@ let call_liu_solver timeout file =
   
 let selected_cmd timeout = function
   | `Spacer -> call_template [|!Hflmc2_options.z3_path; "fp.engine=spacer"|] timeout
-  | `Hoice -> call_template [|"hoice"|] timeout
+  | `Hoice -> call_template [|"hoice"; "--z3"; !Hflmc2_options.z3_path|] timeout
   | `Fptprove -> call_fptprove timeout  
   | `Liu -> call_liu_solver timeout
   | _ -> failwith "you cannot use this"
